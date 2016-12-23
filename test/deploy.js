@@ -22,6 +22,24 @@ setDeployConfig = function(config) {
   return new Deploy('development', config.files, blockchainConfig, contractsConfig, chainManager, true, false, web3);
 }
 
+function Done(fn) {
+  var self   = this;
+  var called = false;
+
+  /**
+   *
+   * @param {*} params...
+   */
+  this.trigger = function (params) {
+    if(called) {
+      return;
+    }
+
+    fn.apply(self, arguments);
+    called = true;
+  };
+}
+
 describe('embark.deploy', function() {
 
   describe('contracts as arguments to other contracts', function() {
@@ -39,7 +57,8 @@ describe('embark.deploy', function() {
         contracts: 'test/support/arguments.yml'
       });
 
-      it("should deploy contracts", function(done) {
+      it("should deploy contracts", function(fn) {
+        var doneWrap = new Done(fn);
 
         deploy.deploy_contracts("development", function() {
           var all_contracts = ['Wallet', 'SimpleStorage', 'AnotherStorage', 'Wallets'];
@@ -49,7 +68,7 @@ describe('embark.deploy', function() {
             assert.equal(deploy.deployedContracts.hasOwnProperty(className), true);
           }
 
-          done();
+          doneWrap.trigger();
         });
 
       });
@@ -77,7 +96,7 @@ describe('embark.deploy', function() {
         result += deploy.generate_provider_file();
         result += deploy.generate_abi_file();
 
-        assert.strictEqual(result, "web3.setProvider(new web3.providers.HttpProvider('http://localhost:8101'));web3.eth.defaultAccount = web3.eth.accounts[0];SimpleStorageAbi = 123;SimpleStorageContract = web3.eth.contract(SimpleStorageAbi);SimpleStorage = SimpleStorageContract.at('0x123');AnotherStorageAbi = 234;AnotherStorageContract = web3.eth.contract(AnotherStorageAbi);AnotherStorage = AnotherStorageContract.at('0x234');");
+        assert.strictEqual(result, "var web3 = new Web3();web3.setProvider(new web3.providers.HttpProvider('http://localhost:8101'));web3.eth.defaultAccount = web3.eth.accounts[0];blockchain = {\"testnet\":false,\"rpcHost\":\"localhost\",\"rpcPort\":8101,\"gasLimit\":1000000,\"gasPrice\":10000000000000,\"rpcWhitelist\":\"*\",\"nat\":[],\"minerthreads\":1,\"genesisBlock\":\"config/genesis.json\",\"datadir\":\"/tmp/embark\",\"bootNodes\":[],\"deployTimeout\":20,\"networkId\":"+deploy.blockchainConfig.networkId+",\"maxPeers\":4,\"mine\":false,\"port\":\"30303\",\"console_toggle\":false,\"mine_when_needed\":true,\"whisper\":false,\"account\":{\"init\":true,\"password\":\"config/password\"},\"geth_extra_opts\":[],\"deploy_synchronously\":false};SimpleStorageAbi = 123;SimpleStorageContract = web3.eth.contract(SimpleStorageAbi);SimpleStorage = SimpleStorageContract.at('0x123');AnotherStorageAbi = 234;AnotherStorageContract = web3.eth.contract(AnotherStorageAbi);AnotherStorage = AnotherStorageContract.at('0x234');contractDB = {\"SimpleStorage\":{\"compiled\":{\"info\":{\"abiDefinition\":123}}},\"AnotherStorage\":{\"compiled\":{\"info\":{\"abiDefinition\":234}}}};");
       });
     });
   });
@@ -95,7 +114,9 @@ describe('embark.deploy', function() {
         contracts: 'test/support/arguments2.yml'
       });
 
-      it("should deploy contracts", function(done) {
+      it("should deploy contracts", function(fn) {
+        var doneWrap = new Done(fn);
+
         deploy.deploy_contracts("development", function() {
 
           var all_contracts = ['token', 'Crowdsale'];
@@ -105,7 +126,7 @@ describe('embark.deploy', function() {
             assert.equal(deploy.deployedContracts.hasOwnProperty(className), true);
           }
 
-          done();
+          doneWrap.trigger();
         });
 
       });
@@ -126,7 +147,9 @@ describe('embark.deploy', function() {
         contracts: 'test/support/instances.yml'
       });
 
-      it("should deploy contracts", function(done) {
+      it("should deploy contracts", function(fn) {
+        var doneWrap = new Done(fn);
+
         deploy.deploy_contracts("development", function() {
 
           var all_contracts = ['BarStorage', 'FooStorage'];
@@ -137,7 +160,7 @@ describe('embark.deploy', function() {
           }
           assert.notEqual(deploy.deployedContracts.hasOwnProperty('SimpleStorage'), true);
 
-          done();
+          doneWrap.trigger();
         });
       });
 
@@ -158,7 +181,9 @@ describe('embark.deploy', function() {
         contracts: 'test/support/arguments3.yml'
       });
 
-      it("should deploy contracts", function(done) {
+      it("should deploy contracts", function(fn) {
+        var doneWrap = new Done(fn);
+
         deploy.deploy_contracts("development", function() {
           var all_contracts = ['DataSource', 'MyDataSource', 'Manager'];
           for(var i=0; i < all_contracts.length; i++) {
@@ -167,11 +192,13 @@ describe('embark.deploy', function() {
             assert.equal(deploy.deployedContracts.hasOwnProperty(className), true);
           }
 
-          done();
+          doneWrap.trigger();
         });
       });
 
-      it("should execute deploy changes", function() {
+      it("should execute deploy changes", function(fn) {
+        var doneWrap = new Done(fn);
+
         web3.setProvider(new web3.providers.HttpProvider('http://localhost:8101'));
         web3.eth.defaultAccount = web3.eth.accounts[0];
 
@@ -188,6 +215,8 @@ describe('embark.deploy', function() {
 
         assert.equal(DataSource.storeData().toNumber(), 5);
         assert.equal(Manager.data().toString(), my_data_source_address);
+
+        doneWrap.trigger();
       });
 
     });
@@ -206,7 +235,9 @@ describe('embark.deploy', function() {
         contracts: 'test/support/address.yml'
       });
 
-      it("should not deploy contracts with addresses defined", function(done) {
+      it("should not deploy contracts with addresses defined", function(fn) {
+        var doneWrap = new Done(fn);
+
         deploy.deploy_contracts("development", function() {
           var expected_deploys = ['SimpleStorage', 'BarStorage', 'FooStorage'];
 
@@ -218,6 +249,8 @@ describe('embark.deploy', function() {
 
           assert.equal(deploy.deployedContracts['SimpleStorage'], '0x123');
           assert.equal(deploy.deployedContracts['BarStorage'], '0x234');
+
+          doneWrap.trigger();
         });
       });
 

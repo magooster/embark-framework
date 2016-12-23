@@ -23,8 +23,8 @@
     "solc": "^0.4.4",
     "toposort": "^0.2.10",
     "web3": "^0.16.0",
-    "wrench": "^1.5.8",
-    "ethersim": "^0.5.0"
+    "bignumber.js": "debris/bignumber.js#master",
+    "wrench": "^1.5.8"
   },
   "author": "Iuri Matias <iuri.matias@gmail.com>",
   "contributors": [],

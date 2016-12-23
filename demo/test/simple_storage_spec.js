@@ -1,10 +1,17 @@
 var assert = require('assert');
 var Embark = require('embark-framework');
 var EmbarkSpec = Embark.initTests();
+var web3 = EmbarkSpec.web3;
 
-describe("SimpleStorage", function(done) {
+describe("SimpleStorage", function() {
   before(function(done) {
-    EmbarkSpec.deployAll(done);
+    EmbarkSpec.sim.createAccounts(10, function() {
+      EmbarkSpec.sim.setBalance(web3.eth.accounts[0], 1000000000000000000000, function() {
+        EmbarkSpec.deployAll(done);
+        // or
+        // EmbarkSpec.deployContract('SimpleStorage', [100], done);
+      });
+    });
   });
 
   it("should set constructor value", function(done) {
@@ -23,4 +30,4 @@ describe("SimpleStorage", function(done) {
     });
   });
 
-})
+});
