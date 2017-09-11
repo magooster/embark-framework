@@ -1,6 +1,6 @@
 {
   "name": "embark-framework",
-  "version": "1.2.0-idc",
+  "version": "1.3.0-idc",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,9 +20,9 @@
     "mkdirp": "^0.5.1",
     "read-yaml": "^1.0.0",
     "shelljs": "^0.5.0",
-    "solc": "^0.4.4",
+    "solc": "^0.4.10",
     "toposort": "^0.2.10",
-    "web3": "^0.16.0",
+    "web3": "^0.18.0",
     "bignumber.js": "debris/bignumber.js#master",
     "wrench": "^1.5.8"
   },
